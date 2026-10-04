@@ -1,0 +1,6 @@
+{
+  "name": "우주 방어 타자 연습",
+  "description": "초등학교 3~4학년 학생들을 위한 맞춤법과 띄어쓰기 우주 방어 타자 연습 게임",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

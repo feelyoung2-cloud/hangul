@@ -1,0 +1,185 @@
+{
+  "entities": {
+    "Word": {
+      "title": "Word",
+      "description": "Vocabulary or sentence item for space defense typing practice",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The target word or sentence to type",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "category": {
+          "type": "string",
+          "description": "Category such as 맞춤법, 띄어쓰기, 속담, 교과서 어휘",
+          "maxLength": 50
+        },
+        "hint": {
+          "type": "string",
+          "description": "Helpful spelling guide or meaning hint for 3rd/4th graders",
+          "maxLength": 200
+        },
+        "difficulty": {
+          "type": "string",
+          "description": "Difficulty level: easy, normal, hard",
+          "enum": ["easy", "normal", "hard"]
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of creation"
+        }
+      },
+      "required": ["text", "category", "difficulty", "createdAt"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Elementary student account record with hashed password",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Student full name or nickname",
+          "minLength": 2,
+          "maxLength": 30
+        },
+        "passwordHash": {
+          "type": "string",
+          "description": "SHA-256 hash of student personal password",
+          "minLength": 32,
+          "maxLength": 128
+        },
+        "salt": {
+          "type": "string",
+          "description": "Salt used for password hashing",
+          "maxLength": 64
+        },
+        "needsPasswordReset": {
+          "type": "boolean",
+          "description": "Flag indicating teacher requested password reset"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of registration"
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "description": "ISO timestamp of last login"
+        }
+      },
+      "required": ["name", "passwordHash", "createdAt"]
+    },
+    "LeaderboardEntry": {
+      "title": "LeaderboardEntry",
+      "description": "Student high score record for the classroom leaderboard",
+      "type": "object",
+      "properties": {
+        "studentId": {
+          "type": "string",
+          "description": "Unique identifier of the student",
+          "maxLength": 64
+        },
+        "studentName": {
+          "type": "string",
+          "description": "Name of the student",
+          "minLength": 2,
+          "maxLength": 30
+        },
+        "score": {
+          "type": "number",
+          "description": "Total score earned in the defense run"
+        },
+        "accuracy": {
+          "type": "number",
+          "description": "Typing accuracy percentage (0-100)"
+        },
+        "maxCombo": {
+          "type": "number",
+          "description": "Highest combo chain achieved"
+        },
+        "wordsDestroyed": {
+          "type": "number",
+          "description": "Total number of meteors intercepted"
+        },
+        "achievedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the score was set"
+        }
+      },
+      "required": ["studentId", "studentName", "score", "accuracy", "maxCombo", "wordsDestroyed", "achievedAt"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Teacher admin configuration and game parameters",
+      "type": "object",
+      "properties": {
+        "adminPasswordHash": {
+          "type": "string",
+          "description": "SHA-256 hash of teacher admin password",
+          "maxLength": 128
+        },
+        "adminSalt": {
+          "type": "string",
+          "description": "Salt for teacher password hashing",
+          "maxLength": 64
+        },
+        "initialLives": {
+          "type": "number",
+          "description": "Default life shields per game"
+        },
+        "initialFallSpeed": {
+          "type": "number",
+          "description": "Starting meteor fall speed"
+        },
+        "isInitialized": {
+          "type": "boolean",
+          "description": "Whether initial teacher setup has been completed"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last settings update"
+        }
+      },
+      "required": ["isInitialized", "updatedAt"]
+    },
+    "TestDocument": {
+      "title": "TestDocument",
+      "description": "Connection verification document for live Firestore CRUD testing",
+      "type": "object",
+      "properties": {
+        "test": {
+          "type": "boolean",
+          "description": "Test verification flag"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "ISO timestamp of the test"
+        }
+      },
+      "required": ["test", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/words/{wordId}": {
+      "schema": "Word",
+      "description": "Collection of vocabulary words and sentences for space defense typing"
+    },
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Collection of student accounts with hashed passwords"
+    },
+    "/leaderboard/{entryId}": {
+      "schema": "LeaderboardEntry",
+      "description": "Classroom ranking leaderboard entries"
+    },
+    "/settings/{settingId}": {
+      "schema": "Settings",
+      "description": "System settings and teacher credentials"
+    },
+    "/test_connection/{testId}": {
+      "schema": "TestDocument",
+      "description": "Collection for verifying live Firestore CRUD connection status"
+    }
+  }
+}

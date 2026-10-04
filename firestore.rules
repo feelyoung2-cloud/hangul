@@ -1,0 +1,99 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Connection testing
+    match /test_connection/{testId} {
+      allow read, write: if isValidId(testId);
+    }
+
+    // Words collection
+    function isValidWord(data) {
+      return data.keys().hasAll(['text', 'category', 'difficulty', 'createdAt'])
+        && data.keys().hasOnly(['text', 'category', 'difficulty', 'hint', 'createdAt'])
+        && data.text is string && data.text.size() >= 1 && data.text.size() <= 100
+        && data.category is string && data.category.size() <= 50
+        && data.difficulty in ['easy', 'normal', 'hard']
+        && (!('hint' in data) || (data.hint is string && data.hint.size() <= 200))
+        && data.createdAt is string && data.createdAt.size() <= 50;
+    }
+
+    match /words/{wordId} {
+      allow read: if true;
+      allow create: if isValidId(wordId) && isValidWord(incoming());
+      allow update: if isValidId(wordId) && isValidWord(incoming());
+      allow delete: if isValidId(wordId);
+    }
+
+    // Students collection
+    function isValidStudent(data) {
+      return data.keys().hasAll(['name', 'passwordHash', 'createdAt'])
+        && data.keys().hasOnly(['name', 'passwordHash', 'salt', 'needsPasswordReset', 'createdAt', 'lastLoginAt'])
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 30
+        && data.passwordHash is string && data.passwordHash.size() >= 32 && data.passwordHash.size() <= 128
+        && (!('salt' in data) || (data.salt is string && data.salt.size() <= 64))
+        && (!('needsPasswordReset' in data) || (data.needsPasswordReset is bool))
+        && data.createdAt is string && data.createdAt.size() <= 50
+        && (!('lastLoginAt' in data) || (data.lastLoginAt is string && data.lastLoginAt.size() <= 50));
+    }
+
+    match /students/{studentId} {
+      allow read: if true;
+      allow create: if isValidId(studentId) && isValidStudent(incoming());
+      allow update: if isValidId(studentId) && isValidStudent(incoming());
+      allow delete: if isValidId(studentId);
+    }
+
+    // Leaderboard collection
+    function isValidLeaderboardEntry(data) {
+      return data.keys().hasAll(['studentId', 'studentName', 'score', 'accuracy', 'maxCombo', 'wordsDestroyed', 'achievedAt'])
+        && data.keys().hasOnly(['studentId', 'studentName', 'score', 'accuracy', 'maxCombo', 'wordsDestroyed', 'achievedAt'])
+        && data.studentId is string && data.studentId.size() <= 64
+        && data.studentName is string && data.studentName.size() >= 2 && data.studentName.size() <= 30
+        && data.score is number && data.score >= 0 && data.score <= 1000000
+        && data.accuracy is number && data.accuracy >= 0 && data.accuracy <= 100
+        && data.maxCombo is number && data.maxCombo >= 0 && data.maxCombo <= 10000
+        && data.wordsDestroyed is number && data.wordsDestroyed >= 0 && data.wordsDestroyed <= 10000
+        && data.achievedAt is string && data.achievedAt.size() <= 50;
+    }
+
+    match /leaderboard/{entryId} {
+      allow read: if true;
+      allow create: if isValidId(entryId) && isValidLeaderboardEntry(incoming());
+      allow update: if isValidId(entryId) && isValidLeaderboardEntry(incoming());
+      allow delete: if isValidId(entryId);
+    }
+
+    // Settings collection
+    function isValidSettings(data) {
+      return data.keys().hasAll(['isInitialized', 'updatedAt'])
+        && data.keys().hasOnly(['isInitialized', 'updatedAt', 'adminPasswordHash', 'adminSalt', 'initialLives', 'initialFallSpeed'])
+        && data.isInitialized is bool
+        && (!('adminPasswordHash' in data) || (data.adminPasswordHash is string && data.adminPasswordHash.size() <= 128))
+        && (!('adminSalt' in data) || (data.adminSalt is string && data.adminSalt.size() <= 64))
+        && (!('initialLives' in data) || (data.initialLives is number && data.initialLives >= 1 && data.initialLives <= 10))
+        && (!('initialFallSpeed' in data) || (data.initialFallSpeed is number && data.initialFallSpeed >= 0.5 && data.initialFallSpeed <= 10))
+        && data.updatedAt is string && data.updatedAt.size() <= 50;
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
+      allow create: if isValidId(settingId) && isValidSettings(incoming());
+      allow update: if isValidId(settingId) && isValidSettings(incoming());
+      allow delete: if isValidId(settingId);
+    }
+  }
+}
